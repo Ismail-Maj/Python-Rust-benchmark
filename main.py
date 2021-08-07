@@ -28,13 +28,14 @@ def max_intersection(A, B):
     x6, y6 = np.minimum(x2, x4), np.minimum(y2, y4)
     width, height = x6 - x5, y6 - y5
     area = width.clip(min=0) * height  # must clip one to avoid negative * negative -> positive
-    best_index = area.argmax()
-    cord1, cord2 = best_index // area.shape[0], best_index % area.shape[0]
 
-    if area[cord1][cord2] <= 0:
+    best_index = area.argmax()
+    line, column = best_index // area.shape[1], best_index % area.shape[1]
+
+    if area[line][column] <= 0:
         return None
 
-    return [x5[cord1][cord2]], [x6[cord1][cord2]], [y5[cord1][cord2]], [y6[cord1][cord2]]
+    return [x5[line][column]], [x6[line][column]], [y5[line][column]], [y6[line][column]]
 
 
 if __name__ == "__main__":
