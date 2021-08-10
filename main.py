@@ -70,9 +70,9 @@ def two_sets_intersection_python(x1, x2, y1, y2, x3, x4, y3, y4):
     best_val, best_row, best_col = -1, -1, -1
 
     for idx_row, (row_width, row_height) in enumerate(zip(width, height)):
-        for idx_col, (r, h) in enumerate(zip(row_width, row_height)):
-            if r > 0:
-                area = r*h 
+        for idx_col, (w, h) in enumerate(zip(row_width, row_height)):
+            if w > 0:
+                area = w*h 
                 if area > best_val:
                     best_val = area
                     best_row = idx_row 
