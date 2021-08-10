@@ -83,7 +83,9 @@ def get_parser():
     parser.add_argument("-n", type=int, default=20)
     parser.add_argument("-p", type=int, default=20)
     parser.add_argument("-s", "--seed", type=int, default=None)
-    parser.add_argument("-d", "--display", type=bool, default=True)
+    parser.add_argument('--display', dest='display', default=False, action='store_true')
+    parser.add_argument('--no-display', dest='display', action='store_false')
+    parser.set_defaults(display=True)
     parser.add_argument("--window-width", type=int, default=1600)
     parser.add_argument("--window-height", type=int, default=900)
     return parser
