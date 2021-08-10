@@ -124,8 +124,7 @@ def get_parser():
     parser.add_argument("-n", type=int, default=20)
     parser.add_argument("-p", type=int, default=20)
     parser.add_argument("-s", "--seed", type=int, default=None)
-    parser.add_argument('--display', action='store_true', dest='display')
-    parser.add_argument('--no-display', action='store_false', dest='display')
+    parser.add_argument("-d", "--display", type=bool, default=True)
     parser.add_argument("--window-width", type=int, default=1600)
     parser.add_argument("--window-height", type=int, default=900)
     return parser
@@ -133,5 +132,5 @@ def get_parser():
 
 if __name__ == "__main__":
     args = get_parser().parse_args()
-    main(args)
+    print("%0.5f" % main(args))
 
