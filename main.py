@@ -38,50 +38,9 @@ def two_sets_intersection_numpy(x1, x2, y1, y2, x3, x4, y3, y4):
     row, column = best_index // area.shape[1], best_index % area.shape[1]
 
     if area[row][column] <= 0:
-        raise Exception
+        raise ValueError("empty intersection")
 
     return x5[row][column], x6[row][column], y5[row][column], y6[row][column]
-
-def two_sets_intersection_python(x1, x2, y1, y2, x3, x4, y3, y4):
-    def matrix_extremum(a, b, max=True):
-        ops = operator.lt if max else operator.gt
-        res = [[0]*len(a) for _ in range(len(b))]
-        for i, e2 in enumerate(b):
-            for j, e1 in enumerate(a):
-                res[i][j] = e2 if ops(e1, e2) else e1
-        return res
-
-    def matrix_minus(m1, m2):
-        res = [[0]* len(m1[0]) for _ in range(len(m1))]
-        for idx_row, (row1, row2) in enumerate(zip(m1, m2)):
-            for idx_col, (e1, e2) in enumerate(zip(row1, row2)):
-                res[idx_row][idx_col] = e1 - e2
-        return res
-    
-    x5 = matrix_extremum(x1, x3, max=True)
-    x6 = matrix_extremum(x2, x4, max=False)
-
-    y5 = matrix_extremum(y1, y3, max=True)
-    y6 = matrix_extremum(y2, y4, max=False)
-
-    width = matrix_minus(x6, x5)
-    height = matrix_minus(y6, y5)
-
-    best_val, best_row, best_col = -1, -1, -1
-
-    for idx_row, (row_width, row_height) in enumerate(zip(width, height)):
-        for idx_col, (w, h) in enumerate(zip(row_width, row_height)):
-            if w > 0:
-                area = w*h 
-                if area > best_val:
-                    best_val = area
-                    best_row = idx_row 
-                    best_col = idx_col 
-    
-    if best_val == -1:
-        raise Exception
-
-    return x5[best_row][best_col], x6[best_row][best_col], y5[best_row][best_col], y6[best_row][best_col]
 
 def main(args): 
     np.random.seed(args.seed)
@@ -105,7 +64,7 @@ def main(args):
     elif args.engine == "numpy":
         function = two_sets_intersection_numpy
     else:
-        function = two_sets_intersection_python
+        raise ValueError("engine doesn't exist!")
 
     t = time.time()
     min_x, max_x, min_y, max_y = function(x1, x2, y1, y2, x3, x4, y3, y4)
@@ -120,7 +79,7 @@ def main(args):
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--engine", type=str, default="numpy", help="current options: rust numpy python")
+    parser.add_argument("--engine", type=str, default="numpy", help="current options: rust numpy")
     parser.add_argument("-n", type=int, default=20)
     parser.add_argument("-p", type=int, default=20)
     parser.add_argument("-s", "--seed", type=int, default=None)
