@@ -11,7 +11,7 @@ for s in size:
         if engine == "python" and s > 10000: # lists aren't memory efficient
             python.append(0)
             continue
-        config = f"--seed 55 --no-display --engine {engine} -n {s} -p {s}"            
+        config = f"--seed 55 --display False --engine {engine} -n {s} -p {s}"            
         args = get_parser().parse_args(config.split())
         locals()[engine].append(main(args))
 
