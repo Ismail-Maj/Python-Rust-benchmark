@@ -1,5 +1,8 @@
 import cv2
+import time
 import numpy as np
+import argparse
+import rust_lib
 
 
 def generate_boxes(width_max, height_max, size=20):
@@ -18,9 +21,7 @@ def draw_boxes(image, boxes, color=(0, 0, 0), thickness=2):
             cv2.rectangle(image, (x1, y1), (x2, y2), color=color, thickness=thickness)
 
 
-def max_intersection(A, B):
-    x1, x2, y1, y2 = A
-    x3, x4, y3, y4 = B
+def two_sets_intersection_numpy(x1, x2, y1, y2, x3, x4, y3, y4):
 
     x5 = np.maximum(np.expand_dims(x1, axis=0), np.expand_dims(x3, axis=1))
     x6 = np.minimum(np.expand_dims(x2, axis=0), np.expand_dims(x4, axis=1))
@@ -29,6 +30,7 @@ def max_intersection(A, B):
     y6 = np.minimum(np.expand_dims(y2, axis=0), np.expand_dims(y4, axis=1))
 
     width, height = x6 - x5, y6 - y5
+
     area = width.clip(min=0) * height  # must clip one to avoid negative * negative -> positive
 
     best_index = area.argmax()
@@ -37,19 +39,42 @@ def max_intersection(A, B):
     if area[line][column] <= 0:
         return None
 
-    return [x5[line][column]], [x6[line][column]], [y5[line][column]], [y6[line][column]]
+    return x5[line][column], x6[line][column], y5[line][column], y6[line][column]
 
 
 if __name__ == "__main__":
-    width_max = 1600
-    height_max = 900
-    image = np.full((height_max, width_max, 3), 255, dtype=np.uint8)
-    A = generate_boxes(width_max, height_max)
-    B = generate_boxes(width_max, height_max)
-    draw_boxes(image, A, color=(0, 0, 255))
-    draw_boxes(image, B, color=(255, 0, 0))
-    cv2.imshow("window", image)
-    cv2.waitKey()
-    draw_boxes(image, max_intersection(A, B), thickness=-1)
-    cv2.imshow("window", image)
-    cv2.waitKey()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--engine", type=str, default="numpy") # [numpy / rust]
+    parser.add_argument("-n", type=int, default=20)
+    parser.add_argument("-p", type=int, default=20)
+    parser.add_argument("-s", "--seed", type=int, default=None)
+    parser.add_argument("-d","--display", type=float, default=True)
+    parser.add_argument("--window-width", type=int, default=1600)
+    parser.add_argument("--window-height", type=int, default=900)
+    args = parser.parse_args()
+
+    np.random.seed(args.seed)
+
+    image = np.full((args.window_height, args.window_width, 3), 255, dtype=np.uint8)
+
+    A = generate_boxes(args.window_width, args.window_height, size=args.n)
+    B = generate_boxes(args.window_width, args.window_height, size=args.p)
+
+    if args.display:
+        draw_boxes(image, A, color=(0, 0, 255))
+        draw_boxes(image, B, color=(255, 0, 0))
+        cv2.imshow("window", image)
+        cv2.waitKey()
+
+    x1, x2, y1, y2 = A
+    x3, x4, y3, y4 = B
+
+    function = rust_lib.two_sets_intersection if args.engine == "rust" else two_sets_intersection_numpy
+    t = time.time()
+    min_x, max_x, min_y, max_y = function(x1, x2, y1, y2, x3, x4, y3, y4)
+    print(f"{time.time()-t:.3f}")
+
+    if args.display:
+        cv2.rectangle(image, (min_x, min_y), (max_x, max_y), color=(0,0,0), thickness=-1)
+        cv2.imshow("window", image)
+        cv2.waitKey()
