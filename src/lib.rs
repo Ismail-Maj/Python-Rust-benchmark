@@ -1,8 +1,6 @@
-extern crate rayon; //parallel computing
-
 use pyo3::prelude::{pymodule, PyModule, PyResult, Python, pyfunction, wrap_pyfunction};
 use std::cmp::{min, max};
-use rayon::*;
+
 #[pyfunction]
 fn two_sets_intersection(x1: Vec<isize>, x2: Vec<isize>, y1: Vec<isize>, y2: Vec<isize>, x3: Vec<isize>, x4: Vec<isize>, y3: Vec<isize>, y4: Vec<isize>) -> PyResult<Vec<isize>> {
     let (mut best_value, mut x_min, mut x_max, mut y_min, mut y_max) = (-1, 0, 0, 0, 0);
