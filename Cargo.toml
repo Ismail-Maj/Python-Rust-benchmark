@@ -6,6 +6,9 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib"]
 
+[dependencies]
+rayon = "1.5"
+
 [dependencies.pyo3]
 version = "0.14.1"
 features = ["extension-module"]
