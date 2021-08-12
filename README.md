@@ -11,4 +11,5 @@ $ python main.py -n 30 -p 10 --seed 42  --engine rust
   <img src="figure.png" />
 </p>
 
-**memory usage is quadratic in numpy and linear in rust**
+*memory usage is quadratic in numpy and linear in rust*  
+todo benchmark multithreaded rust
