@@ -5,7 +5,7 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt  
 $ maturin develop --release  
 $ python src/main.py -n 30 -p 10 --seed 42 --engine rust
-# available engines = python, numpy, rust, rust-multicore
+# available engines: python, numpy, rust, rust-multicore
 ```
 
 <p align="center">
