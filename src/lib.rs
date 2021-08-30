@@ -26,34 +26,29 @@ fn two_sets_intersection(x1: Vec<isize>, x2: Vec<isize>, y1: Vec<isize>, y2: Vec
     });
 
     if best_value <= 0 {
-        panic!("empty intersection");
+        panic!("empty intersection")
+    }else{
+        Ok(vec![x_max, x_min, y_max, y_min])
     }
-    let mut res = Vec::new();
-    res.push(x_max);
-    res.push(x_min);
-    res.push(y_max);
-    res.push(y_min);
 
-    Ok(res)
 }
 
 #[pyfunction]
 fn two_sets_intersection_multicore(x1: Vec<isize>, x2: Vec<isize>, y1: Vec<isize>, y2: Vec<isize>, x3: Vec<isize>, x4: Vec<isize>, y3: Vec<isize>, y4: Vec<isize>) -> PyResult<Vec<isize>> {
-    let best_value = Arc::new(Mutex::new(0));
-    let (x_min, x_max, y_min, y_max) = (Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)));
+    let (best_value, x_min, x_max, y_min, y_max) = (Arc::new(Mutex::new(0)), Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)),Arc::new(Mutex::new(0)));
 
     x3.par_iter().zip(x4.par_iter().zip(y3.par_iter().zip(y4.par_iter()))).for_each(|(ex3, (ex4, (ey3, ey4)))|{
         let best_value = Arc::clone(&best_value);
-        let (x_min, x_max, y_min, y_max) = (Arc::clone(&x_min),Arc::clone(&x_max),Arc::clone(&y_min),Arc::clone(&y_max));
+        let (x_min, x_max, y_min, y_max) = (Arc::clone(&x_min), Arc::clone(&x_max), Arc::clone(&y_min), Arc::clone(&y_max));
         let mut thread_best = 0;
         let (mut t_x_min, mut t_x_max, mut t_y_min, mut t_y_max) = (0,0,0,0);
         x1.iter().zip(x2.iter().zip(y1.iter().zip(y2.iter()))).for_each(|(ex1, (ex2, (ey1, ey2)))|{
             let (&ex5, &ex6, &ey5, &ey6) = (min(ex2, ex4), max(ex1, ex3), min(ey2, ey4), max(ey1, ey3));
             let width = ex5 - ex6;
             let height = ey5 - ey6;
-            if (width > 0) & (height > 0) {
+            if width > 0 {
                 let area = width * height;
-                if area > thread_best{
+                if area > thread_best {
                     thread_best = area;
                     t_x_min = ex6;
                     t_x_max = ex5;
@@ -63,8 +58,8 @@ fn two_sets_intersection_multicore(x1: Vec<isize>, x2: Vec<isize>, y1: Vec<isize
             }
         });
         let mut best = best_value.lock().unwrap();
-        let (mut mut_x_min, mut mut_x_max, mut mut_y_min, mut mut_y_max) = (x_min.lock().unwrap(), x_max.lock().unwrap(), y_min.lock().unwrap(), y_max.lock().unwrap());
         if thread_best > *best {
+            let (mut mut_x_min, mut mut_x_max, mut mut_y_min, mut mut_y_max) = (x_min.lock().unwrap(), x_max.lock().unwrap(), y_min.lock().unwrap(), y_max.lock().unwrap());
             *best = thread_best;
             *mut_x_min = t_x_min;
             *mut_x_max = t_x_max;
@@ -73,13 +68,11 @@ fn two_sets_intersection_multicore(x1: Vec<isize>, x2: Vec<isize>, y1: Vec<isize
         }
     });
 
-    let mut res = Vec::new();
-    res.push(*x_max.lock().unwrap());
-    res.push(*x_min.lock().unwrap());
-    res.push(*y_max.lock().unwrap());
-    res.push(*y_min.lock().unwrap());
-
-    Ok(res)
+    if *best_value.lock().unwrap() <= 0 {
+        panic!("empty intersection")
+    }else{
+        Ok(vec![*x_max.lock().unwrap(), *x_min.lock().unwrap(), *y_max.lock().unwrap(), *y_min.lock().unwrap()])
+    }
 }
 
 #[pymodule]
